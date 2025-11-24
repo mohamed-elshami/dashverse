@@ -1,0 +1,2 @@
+export { useSnakeStore } from './snakeStore';
+

@@ -1,0 +1,2 @@
+export { useNewsStore } from './newsStore';
+
