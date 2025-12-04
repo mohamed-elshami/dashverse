@@ -11,8 +11,18 @@ import WeatherChart from './WeatherChart';
 import PrecipitationChart from './PrecipitationChart';
 import WindSpeedChart from './WindSpeedChart';
 import { HiArrowRight } from 'react-icons/hi';
+import { useSEO } from '@/utils/hooks';
 
 const WeatherHome = () => {
+  // SEO
+  useSEO({
+    title: 'Weather Forecast',
+    description: 'Get real-time weather forecasts for any city worldwide. Search for cities, view current location weather, and explore 7-day forecasts with interactive charts.',
+    keywords: 'weather, forecast, temperature, climate, weather app, city weather, current location weather, 7-day forecast',
+    ogTitle: 'Weather Forecast - Dashverse',
+    ogDescription: 'Get real-time weather forecasts for any city worldwide. Search for cities, view current location weather, and explore 7-day forecasts with interactive charts.',
+    ogType: 'website',
+  });
     const navigate = useNavigate();
     const {
         currentWeather,
@@ -124,16 +134,16 @@ const WeatherHome = () => {
     };
 
     return (
-        <div className="p-6 space-y-6">
+        <section className="p-6 space-y-6">
             {/* Header with Search */}
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+            <header className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
                     <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Weather</h1>
                     <p className="text-gray-600 dark:text-gray-300">Search for a city or view your current location weather</p>
                 </div>
 
                 {/* Compact Search Bar */}
-                <div className="relative shrink-0">
+                <nav className="relative shrink-0" aria-label="City search">
                     <div className="flex items-center space-x-2">
                         <input
                             type="text"
@@ -156,40 +166,61 @@ const WeatherHome = () => {
 
                     {/* Search Results Dropdown */}
                     {showSearchResults && searchResults.length > 0 && (
-                        <div className="absolute z-10 w-64 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <ul className="absolute z-10 w-64 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto" role="listbox">
                             {searchResults.map((city) => (
-                                <button
-                                    key={city.id}
-                                    onClick={() => handleCitySelect(city)}
-                                    className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0"
-                                >
-                                    <div className="font-medium text-gray-900 dark:text-white">{city.name}</div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        {city.admin1 && `${city.admin1}, `}
-                                        {city.country}
-                                    </div>
-                                </button>
+                                <li key={city.id}>
+                                    <button
+                                        onClick={() => handleCitySelect(city)}
+                                        className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                                        role="option"
+                                    >
+                                        <div className="font-medium text-gray-900 dark:text-white">{city.name}</div>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                                            {city.admin1 && `${city.admin1}, `}
+                                            {city.country}
+                                        </div>
+                                    </button>
+                                </li>
                             ))}
-                        </div>
+                        </ul>
                     )}
-                </div>
-            </div>
+                </nav>
+            </header>
 
             {/* Error Message */}
             {error && (
-                <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400">
+                <aside className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400" role="alert">
                     {error}
-                </div>
+                </aside>
             )}
 
             {/* Current Location Weather Preview */}
             {currentWeather && currentLocation && (
                 <>
-                    <div className="bg-linear-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 text-white">
+                    <article className="bg-linear-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 text-white">
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h2 className="text-2xl font-bold">
-                                    {currentLocation.name || `${currentLocation.latitude.toFixed(2)}, ${currentLocation.longitude.toFixed(2)}`}
+                                    {(() => {
+                                        // Helper to extract city name from timezone
+                                        const extractCityFromTimezone = (timezone?: string): string | null => {
+                                            if (!timezone) return null;
+                                            const parts = timezone.split('/');
+                                            return parts.length > 1 ? parts[parts.length - 1].replace(/_/g, ' ') : null;
+                                        };
+
+                                        // Prefer stored name, then extract from timezone, then show coordinates
+                                        if (currentLocation.name) {
+                                            return currentLocation.name;
+                                        }
+                                        if (currentWeather?.timezone) {
+                                            const cityFromTimezone = extractCityFromTimezone(currentWeather.timezone);
+                                            if (cityFromTimezone) {
+                                                return cityFromTimezone;
+                                            }
+                                        }
+                                        return `${currentLocation.latitude.toFixed(2)}, ${currentLocation.longitude.toFixed(2)}`;
+                                    })()}
                                 </h2>
                                 <p className="text-blue-100 text-lg font-bold">
                                     {currentWeather.current_weather.temperature}°C
@@ -205,45 +236,46 @@ const WeatherHome = () => {
                                 View Details <HiArrowRight className="w-4 h-4" />
                             </button>
                         </div>
-                    </div>
+                    </article>
 
                     {/* Weather Charts */}
-                    <div className="space-y-6">
+                    <section className="space-y-6" aria-label="Weather charts">
                         <WeatherChart weather={currentWeather} />
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <PrecipitationChart weather={currentWeather} />
                             <WindSpeedChart weather={currentWeather} />
                         </div>
-                    </div>
+                    </section>
                 </>
             )}
 
             {/* Search History */}
             {searchHistory.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 p-6">
+                <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 p-6">
                     <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Recent Searches</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
                         {searchHistory.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => handleHistoryClick(item)}
-                                className="p-4 border cursor-pointer border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
-                            >
-                                <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">{item.country}</div>
-                            </button>
+                            <li key={item.id}>
+                                <button
+                                    onClick={() => handleHistoryClick(item)}
+                                    className="p-4 border cursor-pointer border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left w-full"
+                                >
+                                    <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">{item.country}</div>
+                                </button>
+                            </li>
                         ))}
-                    </div>
-                </div>
+                    </ul>
+                </section>
             )}
 
             {/* Loading State */}
             {loading && (
-                <div className="flex items-center justify-center p-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="flex items-center justify-center p-8" role="status" aria-label="Loading weather data">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true"></div>
                 </div>
             )}
-        </div>
+        </section>
     );
 };
 

@@ -17,7 +17,7 @@ const WeatherChart = ({ weather }: WeatherChartProps) => {
 
   const chartOptions: ApexOptions = useMemo(() => {
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#ffffff' : '#111827';
+    const textColor = isDark ? '#000000' : '#111827';
     const gridColor = isDark ? '#374151' : '#e5e7eb';
 
     return {
@@ -26,6 +26,7 @@ const WeatherChart = ({ weather }: WeatherChartProps) => {
           show: false,
         },
         background: 'transparent',
+        foreColor: textColor,
       },
       theme: {
         mode: theme,
@@ -34,7 +35,7 @@ const WeatherChart = ({ weather }: WeatherChartProps) => {
       dataLabels: {
         enabled: true,
         style: {
-          colors: [textColor],
+          colors: [textColor, textColor],
         },
       },
       stroke: {
@@ -47,7 +48,7 @@ const WeatherChart = ({ weather }: WeatherChartProps) => {
         ),
         labels: {
           style: {
-            colors: textColor,
+            colors: isDark ? '#ffffff' : '#111827',
           },
         },
       },
@@ -56,12 +57,12 @@ const WeatherChart = ({ weather }: WeatherChartProps) => {
           title: {
             text: 'Temperature (°C)',
             style: {
-              color: textColor,
+              color: isDark ? '#ffffff' : '#111827',
             },
           },
           labels: {
             style: {
-              colors: textColor,
+              colors: isDark ? '#ffffff' : '#111827',
             },
           },
         },

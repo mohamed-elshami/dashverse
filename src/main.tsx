@@ -3,13 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-// Initialize theme from localStorage before React renders
-const initializeTheme = () => {
+// Initialize theme and language from localStorage before React renders
+const initializeApp = () => {
   try {
-    const stored = localStorage.getItem('app-storage');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Zustand persist stores as { state: {...}, version: 0 }
+    // Initialize theme
+    const themeStored = localStorage.getItem('app-storage');
+    if (themeStored) {
+      const parsed = JSON.parse(themeStored);
       const theme = parsed?.state?.theme || parsed?.theme;
       const html = document.documentElement;
       if (theme === 'dark') {
@@ -18,17 +18,27 @@ const initializeTheme = () => {
         html.classList.remove('dark');
       }
     } else {
-      // Default to light mode if no storage
       document.documentElement.classList.remove('dark');
     }
+
+    // Initialize language
+    const langStored = localStorage.getItem('language-storage');
+    if (langStored) {
+      const parsed = JSON.parse(langStored);
+      const lang = parsed?.state?.language || parsed?.language || 'en';
+      document.documentElement.lang = lang;
+    } else {
+      document.documentElement.lang = 'en'; // Default to English
+    }
   } catch (error) {
-    console.error('Error initializing theme:', error);
-    // Default to light mode on error
+    console.error('Error initializing app:', error);
+    // Defaults
     document.documentElement.classList.remove('dark');
+    document.documentElement.lang = 'en';
   }
 };
 
-initializeTheme();
+initializeApp();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

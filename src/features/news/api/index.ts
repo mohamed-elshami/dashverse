@@ -1,2 +1,1 @@
-// News API functions will be added here
-
+export * from './newsApi';

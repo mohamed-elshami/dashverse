@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { HiMenu, HiMoon, HiSun } from 'react-icons/hi';
 import { useAppStore } from '@/stores/appStore';
+import LanguageSelector from '@/components/LanguageSelector';
 import type { NavItem } from '@/layouts/types';
 
 interface TopBarProps {
@@ -52,18 +53,21 @@ const TopBar = ({ items, onToggleSidebar }: TopBarProps) => {
         </div>
       </div>
 
-      <button
-        onClick={toggleTheme}
-        className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-        aria-label="Toggle theme"
-        title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-      >
-        {theme === 'light' ? (
-          <HiMoon className="w-5 h-5" />
-        ) : (
-          <HiSun className="w-5 h-5" />
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        <LanguageSelector />
+        <button
+          onClick={toggleTheme}
+          className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          aria-label="Toggle theme"
+          title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          {theme === 'light' ? (
+            <HiMoon className="w-5 h-5" />
+          ) : (
+            <HiSun className="w-5 h-5" />
+          )}
+        </button>
+      </div>
     </header>
   );
 };

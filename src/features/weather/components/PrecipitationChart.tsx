@@ -16,7 +16,7 @@ const PrecipitationChart = ({ weather }: PrecipitationChartProps) => {
 
   const chartOptions: ApexOptions = useMemo(() => {
     const isDark = theme === 'dark';
-    const textColor = isDark ? '#ffffff' : '#111827';
+    const textColor = isDark ? '#000000' : '#111827';
     const gridColor = isDark ? '#374151' : '#e5e7eb';
 
     return {
@@ -26,6 +26,7 @@ const PrecipitationChart = ({ weather }: PrecipitationChartProps) => {
           show: false,
         },
         background: 'transparent',
+        foreColor: textColor,
       },
       theme: {
         mode: theme,
@@ -34,7 +35,7 @@ const PrecipitationChart = ({ weather }: PrecipitationChartProps) => {
       dataLabels: {
         enabled: true,
         style: {
-          colors: [textColor],
+          colors: isDark ? ['#ffffff'] : ['#111827'],
         },
       },
       xaxis: {
@@ -43,7 +44,7 @@ const PrecipitationChart = ({ weather }: PrecipitationChartProps) => {
         ),
         labels: {
           style: {
-            colors: textColor,
+            colors: isDark ? '#ffffff' : '#111827',
           },
         },
       },
@@ -51,12 +52,12 @@ const PrecipitationChart = ({ weather }: PrecipitationChartProps) => {
         title: {
           text: 'Precipitation (mm)',
           style: {
-            color: textColor,
+            color: isDark ? '#ffffff' : '#111827',
           },
         },
         labels: {
           style: {
-            colors: textColor,
+            colors: isDark ? '#ffffff' : '#111827',
           },
         },
       },

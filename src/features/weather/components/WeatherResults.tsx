@@ -6,15 +6,59 @@ import { useNavigate } from 'react-router-dom';
 import WeatherChart from './WeatherChart';
 import PrecipitationChart from './PrecipitationChart';
 import WindSpeedChart from './WindSpeedChart';
+import { useSEO } from '@/utils/hooks';
 
 const WeatherResults = () => {
     const navigate = useNavigate();
     const { currentWeather, currentLocation } = useWeatherStore();
 
+    // Helper to extract city name from timezone (e.g., "Europe/London" -> "London")
+    const extractCityFromTimezone = (timezone?: string): string | null => {
+        if (!timezone) return null;
+        const parts = timezone.split('/');
+        return parts.length > 1 ? parts[parts.length - 1].replace(/_/g, ' ') : null;
+    };
+
+    // Get location name: prefer stored name, then extract from timezone, then show coordinates
+    const getLocationName = (): string => {
+        if (currentLocation?.name) {
+            return currentLocation.name;
+        }
+        if (currentWeather?.timezone) {
+            const cityFromTimezone = extractCityFromTimezone(currentWeather.timezone);
+            if (cityFromTimezone) {
+                return cityFromTimezone;
+            }
+        }
+        if (currentLocation) {
+            return `${currentLocation.latitude.toFixed(2)}, ${currentLocation.longitude.toFixed(2)}`;
+        }
+        return 'Unknown Location';
+    };
+
+    // SEO - Dynamic based on location
+    const locationName = getLocationName();
+    const temperature = currentWeather?.current_weather.temperature || '';
+    const seoDescription = currentWeather
+        ? `Weather forecast for ${locationName}. Current temperature: ${temperature}°C. View detailed 7-day forecast with temperature, precipitation, and wind speed charts.`
+        : `View detailed weather forecast for ${locationName}.`;
+
+    useSEO(
+        {
+            title: `Weather - ${locationName}`,
+            description: seoDescription,
+            keywords: `weather, forecast, ${locationName}, temperature, climate, weather forecast, 7-day forecast`,
+            ogTitle: `Weather Forecast for ${locationName} - Dashverse`,
+            ogDescription: seoDescription,
+            ogType: 'website',
+        },
+        [locationName, temperature]
+    );
+
     if (!currentWeather) {
         return (
-            <div className="p-6">
-                <div className="text-center py-12">
+            <section className="p-6">
+                <section className="text-center py-12">
                     <p className="text-gray-600 text-lg font-bold dark:text-gray-300 mb-4">No weather data available</p>
                     <button
                         onClick={() => navigate('/weather')}
@@ -22,34 +66,36 @@ const WeatherResults = () => {
                     >
                         Go to Weather Home
                     </button>
-                </div>
-            </div>
+                </section>
+            </section>
         );
     }
 
     const { current_weather, daily } = currentWeather;
-    const locationName = currentLocation?.name || 'Current Location';
 
     return (
-        <div className="p-6 space-y-6">
+        <section className="p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <header className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{locationName}</h1>
                     <p className="text-gray-600 dark:text-gray-300">
                         {currentWeather.timezone} • {currentWeather.elevation}m elevation
                     </p>
                 </div>
-                <button
-                    onClick={() => navigate('/weather')}
-                    className="px-4 py-2 flex items-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors cursor-pointer"
-                >
-                    <HiArrowLeft className="w-4 h-4" /> Back
-                </button>
-            </div>
+                <nav>
+                    <button
+                        onClick={() => navigate('/weather')}
+                        className="px-4 py-2 flex items-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors cursor-pointer"
+                        aria-label="Go back to weather home"
+                    >
+                        <HiArrowLeft className="w-4 h-4" /> Back
+                    </button>
+                </nav>
+            </header>
 
             {/* Current Weather Card */}
-            <div className="bg-linear-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
+            <article className="bg-linear-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-8 text-white">
                 <div className="flex items-center justify-between">
                     <div>
                         <div className="text-6xl font-bold mb-2">{current_weather.temperature}°C</div>
@@ -59,27 +105,27 @@ const WeatherResults = () => {
                             <div>Direction: {current_weather.winddirection}°</div>
                         </div>
                     </div>
-                    <div className="text-8xl">🌤️</div>
+                    <div className="text-8xl" aria-hidden="true">🌤️</div>
                 </div>
-            </div>
+            </article>
 
             {/* 7-Day Forecast */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 p-6">
+            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 p-6">
                 <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">7-Day Forecast</h2>
                 <ForecastSlider daily={daily} />
-            </div>
+            </section>
 
             {/* Weather Charts */}
             {currentWeather && (
-                <div className="space-y-6">
+                <section className="space-y-6" aria-label="Weather data visualizations">
                     <WeatherChart weather={currentWeather} />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <PrecipitationChart weather={currentWeather} />
                         <WindSpeedChart weather={currentWeather} />
                     </div>
-                </div>
+                </section>
             )}
-        </div>
+        </section>
     );
 };
 
@@ -135,17 +181,17 @@ const ForecastSlider = ({ daily }: ForecastSliderProps) => {
     return (
         <div className="relative">
             <div className="overflow-hidden" ref={emblaRef}>
-                <div className="flex gap-4">
+                <ul className="flex gap-4" role="list">
                     {daily.time.map((date, index) => (
-                        <div
+                        <li
                             key={date}
                             className="flex-[0_0_auto] select-none min-w-0 w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.667rem)] lg:w-[calc(25%-0.75rem)]"
                         >
-                            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center bg-gray-50 dark:bg-gray-700/50 hover:shadow-md transition-shadow">
-                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                            <article className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center bg-gray-50 dark:bg-gray-700/50 hover:shadow-md transition-shadow">
+                                <time className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 block" dateTime={date}>
                                     {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                                </div>
-                                <div className="text-2xl mb-2">🌤️</div>
+                                </time>
+                                <div className="text-2xl mb-2" aria-hidden="true">🌤️</div>
                                 <div className="text-lg font-bold text-gray-900 dark:text-white">
                                     {daily.temperature_2m_max[index]}°
                                 </div>
@@ -155,10 +201,10 @@ const ForecastSlider = ({ daily }: ForecastSliderProps) => {
                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                     {daily.precipitation_sum[index]}mm
                                 </div>
-                            </div>
-                        </div>
+                            </article>
+                        </li>
                     ))}
-                </div>
+                </ul>
             </div>
             <button
                 onClick={scrollPrev}

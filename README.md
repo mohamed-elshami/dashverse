@@ -29,12 +29,17 @@ A modern, feature-rich dashboard application built with React, TypeScript, and V
 
 - Node.js 18+ 
 - npm or yarn
+- Google Cloud Translation API key (optional, for news translation feature)
 
 ### Installation
 
 ```bash
 # Install dependencies
 npm install
+
+# Create .env file (optional, for Google Translation API)
+# Add your Google Cloud Translation API key:
+# VITE_GOOGLE_TRANSLATE_API_KEY=your_api_key_here
 
 # Start development server
 npm run dev
@@ -45,6 +50,20 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+### Environment Variables
+
+Create a `.env` file in the root directory with the following variable (optional):
+
+```
+VITE_GOOGLE_TRANSLATE_API_KEY=your_google_translate_api_key
+```
+
+**Note:** The Google Translation API key is optional. If not provided, news articles will be displayed in their original language. To get an API key:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable the Cloud Translation API
+3. Create credentials (API key)
+4. Add the key to your `.env` file
 
 ## Project Structure
 
