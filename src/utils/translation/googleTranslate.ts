@@ -6,7 +6,6 @@ const GOOGLE_TRANSLATE_API = 'https://translation.googleapis.com/language/transl
 
 // Translation cache to avoid redundant API calls
 const translationCache = new Map<string, string>();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 // Get API key from environment variable
 const getApiKey = (): string | null => {
